@@ -38,6 +38,34 @@ func redirect(resp http.ResponseWriter, req *http.Request, param httprouter.Para
    http.Redirect(resp,req,req.FormValue("redirecturl"),http.StatusTemporaryRedirect)
     //resp.Write([]byte("delete message from server post"))
 }
+
+func DownloadFile(resp http.ResponseWriter, req *http.Request, param httprouter.Params)  {
+	//file,err:=os.Open(param.ByName("filename"))
+	//if err!=nil{
+	//	resp.WriteHeader(http.StatusNotFound)
+	//	resp.Write([]byte(err.Error()))
+	//	return
+	//}
+	http.ServeFile(resp,req,param.ByName("filename"))
+	//buf := make([]byte,1)
+	//resp.Header().Add("Content-Type", "application/octet-stream")
+	//resp.Header().Add("Content-Disposition", "attachment; filename=\""+"fuckdufji"+"\"")
+	//for ;;{
+	//	size,err:=file.Read(buf)
+	//	if err!=nil{
+	//		if err == io.EOF{
+	//			resp.Write(buf[:size])
+	//
+	//			return
+	//		} else{
+	//
+	//		}
+	//	}else{
+	//		resp.Write(buf[:size])
+	//	}
+	//}
+
+}
 func main() {
 	router := httprouter.New()
 	router.GET("/getMessage", getMessage)
@@ -45,6 +73,7 @@ func main() {
 	router.POST("/addMessage", addMessage)
 	router.PUT("/updateMessage", update)
 	router.DELETE("/delete", delete)
+	router.GET("/download/:filename",DownloadFile)
 	if err := http.ListenAndServe("localhost:7070", router); err != nil {
 		fmt.Println("server internal exception!")
 	}
