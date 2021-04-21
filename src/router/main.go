@@ -5,6 +5,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"time"
+	"context"
+	"github.com/go-redis/redis/v8"
 )
 
 func getMessage(resp http.ResponseWriter, req *http.Request, param httprouter.Params) {
@@ -67,6 +69,7 @@ func DownloadFile(resp http.ResponseWriter, req *http.Request, param httprouter.
 
 }
 func main() {
+	ExampleClient()
 	router := httprouter.New()
 	router.GET("/getMessage", getMessage)
     router.GET("/redirect", redirect)
@@ -77,4 +80,53 @@ func main() {
 	if err := http.ListenAndServe("localhost:7070", router); err != nil {
 		fmt.Println("server internal exception!")
 	}
+}
+
+var ctx = context.Background()
+
+type people struct {
+	UserId int `redis:"userId`
+	UserName string `redis:userName`
+	Gender bool `redis:gender`
+}
+func ExampleClient() {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	err := rdb.Set(ctx, "key", "value", 0).Err()
+	if err != nil {
+		panic(err)
+	}
+
+	val, err := rdb.Get(ctx, "key").Result()
+	if err != nil {
+		panic(err)
+	}
+
+	err1 := rdb.HMSet(ctx,"alex","Gender",false,"UserId",5,"UserName","hhhh").Err()
+	if err1 != nil {
+		panic(err1)
+	}
+	var p1 people
+	err2 := rdb.HGetAll(ctx, "alex").Scan(&p1)
+	if err != nil {
+		panic(err2)
+	}
+	
+	//rdb.HMSet(ctx,"people.alex",)
+	fmt.Println("key", val)
+
+	val2, err := rdb.Get(ctx, "key2").Result()
+	if err == redis.Nil {
+		fmt.Println("key2 does not exist")
+	} else if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("key2", val2)
+	}
+	// Output: key value
+	// key2 does not exist
 }
