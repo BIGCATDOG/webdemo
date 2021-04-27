@@ -106,16 +106,21 @@ func ExampleClient() {
 		panic(err)
 	}
 
-	err1 := rdb.HMSet(ctx,"alex","Gender",false,"UserId",5,"UserName","hhhh").Err()
+	err1 := rdb.HMSet(ctx,"alex","gender",false,"userId",5,"userName","hhhh").Err()
 	if err1 != nil {
 		panic(err1)
 	}
 	var p1 people
+
+	 rdb.HMGet(ctx,"alex","gender","userId")
+
 	err2 := rdb.HGetAll(ctx, "alex").Scan(&p1)
 	if err != nil {
 		panic(err2)
 	}
-	
+
+	rdb.LPush(ctx,"list1","hhh",false,"tueue")
+
 	//rdb.HMSet(ctx,"people.alex",)
 	fmt.Println("key", val)
 
@@ -127,6 +132,18 @@ func ExampleClient() {
 	} else {
 		fmt.Println("key2", val2)
 	}
+
+	rdb.ZAdd(ctx,"userMoneys",&redis.Z{Score: 100,Member: "alex"},&redis.Z{Score: 22,Member: "joe"})
+	//vals, err := rdb.ZInterStore(ctx, "out", &redis.ZStore{
+	//	Keys: []string{"zset1", "zset2"},
+	//	Weights: []float64{2.0, 3.0},
+	//}).Result()
+	//println( vals )
+	res ,_:= rdb.ZPopMax(ctx,"userMoneys",1).Result()
+	res1:= rdb.ZRange(ctx,"userMoneys",-1,33)
+	println(res,res1)
+
+	rdb.Pipeline()
 	// Output: key value
 	// key2 does not exist
 }
